@@ -8,11 +8,19 @@ import java.util.UUID;
 
 public interface EventRepo extends JpaRepository<Event, UUID> {
 
-    @Query(value = "SELECT * FROM event e WHERE e.organizer_id = :userId AND e.event_date < CURRENT_DATE ORDER BY e.event_date DESC limit 10", nativeQuery = true)
+    @Query(value = """
+            SELECT * FROM event e JOIN rsvp r ON r.event_id = e.id
+            WHERE (e.organizer_id = :userId OR r.telegram_user_id = :userId) AND e.event_date < CURRENT_DATE
+            ORDER BY e.event_date DESC LIMIT 10
+            """, nativeQuery = true)
     List<Event> findAllPastEventsByUserId(UUID userId);
 
-    @Query(value = "SELECT * FROM event e WHERE e.organizer_id = :userId AND e.event_date >= CURRENT_DATE ORDER BY e.event_date ASC limit 10", nativeQuery = true)
-    List<Event> findFirstUpcomingEventByOrganizerId(UUID userId);
 
+    @Query(value = """
+            SELECT * FROM event e JOIN rsvp r ON r.event_id = e.id
+            WHERE (e.organizer_id = :userId OR r.telegram_user_id = :userId) AND e.event_date >= CURRENT_DATE
+            ORDER BY e.event_date
+            """, nativeQuery = true)
+    List<Event> findAllUpcomingEventsByUserId(UUID userId);
 
 }

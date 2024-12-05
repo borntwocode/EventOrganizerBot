@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.pdp.eventorganizerbot.entity.Event;
 import uz.pdp.eventorganizerbot.messages.BotMessages;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -89,8 +87,5 @@ public class BotUtils {
         var back = new InlineKeyboardButton(BotMessages.BACK.getMessage(languageCode)).callbackData("PAST_BACK");
         return new InlineKeyboardMarkup(buttons).addRow(back);
     }
-
-
-
 
 }

@@ -111,4 +111,18 @@ public class EventService {
         return formattedMessage.toString();
     }
 
+    public String getPastEventDetailsMessage(Event event, String languageCode, TelegramUser user) {
+        String message = BotMessages.SHORT_EVENT_DETAILS.getMessage(languageCode);
+        List<RSVP> rsvps = rsvpService.findAllByEventId(event.getId());
+        long count = rsvps.stream()
+                .filter(rsvp -> rsvp.getStatus().equals(RSVPStatus.YES))
+                .count();
+        return message.formatted(
+                user.getEventName(),
+                user.getEventDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                user.getEventVenue(),
+                count
+        );
+    }
+
 }

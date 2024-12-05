@@ -119,6 +119,12 @@ public enum BotMessages {
             "🎉 Название мероприятия: %s\n⏰ Дата и время: %s\n📍 Место проведения: %s\n📝 Описание: %s\n👥 Макс. участников: %s"
     ),
 
+    SHORT_EVENT_DETAILS(
+            "🎉 Event Name: %s\n⏰ Date & Time: %s\n📍 Venue: %s\n👥 Attendees: %d",
+            "🎉 Tadbir nomi: %s\n⏰ Sana va vaqt: %s\n📍 Manzil: %s\n👥 Ishtirokchilar: %d",
+            "🎉 Название мероприятия: %s\n⏰ Дата и время: %s\n📍 Место проведения: %s\n👥 Участники: %d"
+    ),
+
     EVENT_DETAILS_V2(
             "Hi %s! You've been invited to an event:\n🎉 Event Name: %s\n⏰ Date & Time: %s\n📍 Venue: %s\n📝 Description: %s\n👥 Max Participants: %s\n🕒 Created On: %s",
             "Salom %s! Siz tadbirga taklif qilindingiz:\n🎉 Tadbir nomi: %s\n⏰ Sana va vaqt: %s\n📍 Manzil: %s\n📝 Tavsif: %s\n👥 Maksimal qatnashchilar: %s\n🕒 Yaratilgan vaqt: %s",

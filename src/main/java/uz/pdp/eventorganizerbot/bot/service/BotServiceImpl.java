@@ -11,7 +11,6 @@ import uz.pdp.eventorganizerbot.entity.enums.RSVPStatus;
 import uz.pdp.eventorganizerbot.entity.enums.TgState;
 import uz.pdp.eventorganizerbot.messages.BotMessages;
 import uz.pdp.eventorganizerbot.service.*;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -61,7 +60,6 @@ public class BotServiceImpl implements BotService {
         userService.changeUserState(user, TgState.CHOOSING_EVENT_MENU);
     }
 
-
     @Override
     public void handleEventMenu(TelegramUser user, String text) {
         String languageCode = user.getLanguageCode();
@@ -78,15 +76,22 @@ public class BotServiceImpl implements BotService {
 
     @Override
     public void handlePastEventDetails(TelegramUser user, String data) {
+        String languageCode = user.getLanguageCode();
         String payload = data.split("_")[1];
-        if(payload.equals("BACK")){
+        if (payload.equals("BACK")) {
             handleMyEvents(user);
-        }else{
+        } else {
             UUID eventId = UUID.fromString(payload);
             Optional<Event> eventOpt = eventService.getEvent(eventId);
             eventOpt.ifPresent(event -> {
-                String eventMessage = eventService.getEventMessage(event, user.getLanguageCode(), user);
-                sendMsgService.sendWithButton(user, eventMessage, botUtils.createBackButton(user.getLanguageCode()));
+                String eventMessage;
+                if (user.getId().equals(event.getOrganizer().getId())) {
+                    eventMessage = eventService.getPastEventDetailsMessage(event, languageCode, user);
+                } else {
+                    eventMessage = eventService.getPastEventDetailsMessage(event, languageCode, user);
+                    eventMessage = eventMessage.substring(0, eventMessage.lastIndexOf("👥") - 1);
+                }
+                sendMsgService.sendWithButton(user, eventMessage, botUtils.createBackButton(languageCode));
                 userService.changeUserState(user, TgState.GOING_BACK_TO_PAST_EVENTS);
             });
         }
@@ -94,7 +99,7 @@ public class BotServiceImpl implements BotService {
 
     @Override
     public void handleBackToPastEvents(TelegramUser user, String text) {
-        if(text.equals(BotMessages.BACK.getMessage(user.getLanguageCode()))) {
+        if (text.equals(BotMessages.BACK.getMessage(user.getLanguageCode()))) {
             handlePastEvents(user);
         }
     }
