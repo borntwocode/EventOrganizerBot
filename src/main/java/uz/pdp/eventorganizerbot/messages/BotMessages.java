@@ -23,6 +23,36 @@ public enum BotMessages {
             "\uD83D\uDCC5Мои события"
     ),
 
+    PAST_EVENTS(
+            "\uD83D\uDD5D Past Events",
+            "\uD83D\uDD5D O'tgan tadbirlar",
+            "\uD83D\uDD5D Прошедшие события"
+    ),
+
+    UPCOMING_EVENTS(
+            "\uD83D\uDD50 Upcoming Events",
+            "\uD83D\uDD50 Kelgusi tadbirlar",
+            "\uD83D\uDD50 Предстоящие события"
+    ),
+
+    NO_PAST_EVENTS(
+            "❌ No past events found",
+            "❌ O'tgan tadbirlar topilmadi",
+            "❌ Прошедшие события не найдены"
+    ),
+
+    NO_UPCOMING_EVENTS(
+            "⏳ No upcoming events found",
+            "⏳ Kelgusi tadbirlar topilmadi",
+            "⏳ Предстоящие события не найдены"
+    ),
+
+    PAST_EVENT_DETAILS(
+            "%d. Event Name: %s, Event Date Time: %s",
+            "%d. Tadbir nomi: %s, Tadbir sanasi va vaqti: %s",
+            "%d. Название события: %s, Дата и время события: %s"
+    ),
+
     INVITE_FRIENDS(
             "\uD83D\uDE4BInvite Friends",
             "\uD83D\uDE4BDo'stlarni taklif qilish",
@@ -108,9 +138,15 @@ public enum BotMessages {
     ),
 
     EVENT_DATE_TIME(
-            "\uD83D\uDCC5 Date and Time:",
-            "\uD83D\uDCC5 Sana va vaqt:",
-            "\uD83D\uDCC5 Дата и время:"
+            "\uD83D\uDCC5 Date and Time [e.g., 25.12.2024 14:30]:",
+            "\uD83D\uDCC5 Sana va vaqt [masalan, 25.12.2024 14:30]:",
+            "\uD83D\uDCC5 Дата и время [например, 25.12.2024 14:30]:"
+    ),
+
+    INVALID_DATE_TIME(
+            "You entered an invalid date and time format. Please enter the date and time in [dd.MM.yyyy HH:mm] format.",
+            "Siz kiritgan sana va vaqt noto‘g‘ri formatda. Iltimos, sana va vaqtni [kk.oo.yyyy ss:mm] shaklida kiriting.",
+            "Вы ввели неправильный формат даты и времени. Пожалуйста, введите дату и время в формате [дд.мм.гггг чч:мм]."
     ),
 
     EVENT_VENUE(

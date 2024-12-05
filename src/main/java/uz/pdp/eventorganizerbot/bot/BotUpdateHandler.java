@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uz.pdp.eventorganizerbot.bot.service.BotService;
 import uz.pdp.eventorganizerbot.entity.TelegramUser;
+import uz.pdp.eventorganizerbot.entity.enums.TgState;
 import uz.pdp.eventorganizerbot.messages.BotCommands;
 import uz.pdp.eventorganizerbot.service.TelegramUserService;
 
@@ -48,6 +49,7 @@ public class BotUpdateHandler {
         } else {
             switch (user.getState()) {
                 case CHOOSING_MENU -> botService.handleMenu(user, text);
+                case CHOOSING_EVENT_MENU -> botService.handleEventMenu(user, text);
                 case ENTERING_EVENT_NAME -> botService.handleEventName(user, text);
                 case ENTERING_EVENT_DATE -> botService.handleEventDate(user, text);
                 case ENTERING_EVENT_VENUE -> botService.handleEventVenue(user, text);
@@ -55,6 +57,7 @@ public class BotUpdateHandler {
                 case ENTERING_EVENT_MAX_PART -> botService.handleEventMaxPart(user, text);
                 case CHOOSING_EVENT_OPTIONS -> botService.handleEventOptions(user, text);
                 case GOING_BACK_TO_MAIN_MENU -> botService.handleBackToMenu(user, text);
+                case GOING_BACK_TO_PAST_EVENTS -> botService.handleBackToPastEvents(user, text);
             }
         }
     }
@@ -64,8 +67,9 @@ public class BotUpdateHandler {
         TelegramUser user = userService.findUser(callbackQuery);
         if(data != null && data.startsWith("rsvp")) {
             botService.handleRSVPOptions(user, data);
+        } else if (data != null && data.startsWith("PAST") && user.getState().equals(TgState.CHOOSING_PAST_EVENT)) {
+            botService.handlePastEventDetails(user, data);
         }
-
     }
 
 }

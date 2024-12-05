@@ -27,7 +27,7 @@ public class EventService {
         String message = BotMessages.EVENT_DETAILS.getMessage(languageCode);
         return message.formatted(
                 user.getEventName(),
-                user.getEventDate(),
+                user.getEventDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 user.getEventVenue(),
                 user.getEventDescription(),
                 user.getEventMaxParticipants()
@@ -38,7 +38,7 @@ public class EventService {
         Event event = Event.builder()
                 .organizer(user)
                 .title(user.getEventName())
-                .eventDate(user.getEventDate())
+                .eventDateTime(user.getEventDateTime())
                 .venue(user.getEventVenue())
                 .description(user.getEventDescription())
                 .maxParticipants(user.getEventMaxParticipants())
@@ -51,7 +51,7 @@ public class EventService {
         return message.formatted(
                 user.getFirstName(),
                 event.getTitle(),
-                event.getEventDate(),
+                event.getEventDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 event.getVenue(),
                 event.getDescription(),
                 event.getMaxParticipants(),
@@ -83,11 +83,32 @@ public class EventService {
                 user.getFirstName(),
                 event.getTitle(),
                 RSVPStatus.getRsvpResponse(userRsvp.getStatus()),
-                event.getEventDate(),
+                event.getEventDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 yesCount,
                 noCount,
                 maybeCount
         );
+    }
+
+    public List<Event> getPastEvents(TelegramUser user) {
+        return eventRepo.findAllPastEventsByUserId(user.getId());
+    }
+
+    public String getPastEventMessage(List<Event> events, String languageCode) {
+        String eventDetailsTemplate = BotMessages.PAST_EVENT_DETAILS.getMessage(languageCode);
+        StringBuilder formattedMessage = new StringBuilder();
+        formattedMessage.append(BotMessages.PAST_EVENTS.getMessage(languageCode)).append("\n\n");
+        for (int i = 0; i < events.size(); i++) {
+            Event event = events.get(i);
+            String eventName = event.getTitle();
+            String eventDateTime = event.getEventDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            formattedMessage.append(String.format(eventDetailsTemplate,
+                            i + 1,
+                            eventName,
+                            eventDateTime))
+                    .append("\n\n");
+        }
+        return formattedMessage.toString();
     }
 
 }

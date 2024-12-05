@@ -28,4 +28,10 @@ public interface BotService {
 
     void handleBackToMenu(TelegramUser user, String text);
 
+    void handleEventMenu(TelegramUser user, String text);
+
+    void handlePastEventDetails(TelegramUser user, String data);
+
+    void handleBackToPastEvents(TelegramUser user, String text);
+
 }

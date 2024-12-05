@@ -5,6 +5,8 @@ import lombok.*;
 import uz.pdp.eventorganizerbot.entity.abs.BaseEntity;
 import uz.pdp.eventorganizerbot.entity.enums.TgState;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -27,7 +29,7 @@ public class TelegramUser extends BaseEntity {
 
     private String eventName;
 
-    private String eventDate;
+    private LocalDateTime eventDateTime;
 
     private String eventVenue;
 

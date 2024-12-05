@@ -10,11 +10,12 @@ import uz.pdp.eventorganizerbot.entity.TelegramUser;
 import uz.pdp.eventorganizerbot.entity.enums.RSVPStatus;
 import uz.pdp.eventorganizerbot.entity.enums.TgState;
 import uz.pdp.eventorganizerbot.messages.BotMessages;
-import uz.pdp.eventorganizerbot.service.EventService;
-import uz.pdp.eventorganizerbot.service.RSVPService;
-import uz.pdp.eventorganizerbot.service.SendMsgService;
-import uz.pdp.eventorganizerbot.service.TelegramUserService;
+import uz.pdp.eventorganizerbot.service.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,6 +29,7 @@ public class BotServiceImpl implements BotService {
     private final EventService eventService;
     private final RSVPService rsvpService;
     private final TelegramUserService telegramUserService;
+    private final TestService testService;
 
     @Override
     public void onStartCommand(TelegramUser user) {
@@ -42,13 +44,71 @@ public class BotServiceImpl implements BotService {
         if (text.equals(BotMessages.CREATE_EVENT.getMessage(user.getLanguageCode()))) {
             handleCreateEvent(user);
         } else if (text.equals(BotMessages.MY_EVENTS.getMessage(user.getLanguageCode()))) {
-//            handleMyEvents(user);
+            handleMyEvents(user);
         } else if (text.equals(BotMessages.INVITE_FRIENDS.getMessage(user.getLanguageCode()))) {
 //            handleInviteFriends(user);
         } else if (text.equals(BotMessages.HELP.getMessage(user.getLanguageCode()))) {
             handleHelp(user);
         } else {
             onStartCommand(user);
+        }
+    }
+
+    private void handleMyEvents(TelegramUser user) {
+        String languageCode = user.getLanguageCode();
+        String message = BotMessages.CHOOSE_MENU.getMessage(languageCode);
+        sendMsgService.sendWithButton(user, message, botUtils.createEventMenuButtons(languageCode));
+        userService.changeUserState(user, TgState.CHOOSING_EVENT_MENU);
+    }
+
+
+    @Override
+    public void handleEventMenu(TelegramUser user, String text) {
+        String languageCode = user.getLanguageCode();
+        if (text.equals(BotMessages.PAST_EVENTS.getMessage(languageCode))) {
+            handlePastEvents(user);
+        } else if (text.equals(BotMessages.UPCOMING_EVENTS.getMessage(languageCode))) {
+
+        } else if (text.equals(BotMessages.BACK.getMessage(languageCode))) {
+            onStartCommand(user);
+        } else {
+            handleMyEvents(user);
+        }
+    }
+
+    @Override
+    public void handlePastEventDetails(TelegramUser user, String data) {
+        String payload = data.split("_")[1];
+        if(payload.equals("BACK")){
+            handleMyEvents(user);
+        }else{
+            UUID eventId = UUID.fromString(payload);
+            Optional<Event> eventOpt = eventService.getEvent(eventId);
+            eventOpt.ifPresent(event -> {
+                String eventMessage = eventService.getEventMessage(event, user.getLanguageCode(), user);
+                sendMsgService.sendWithButton(user, eventMessage, botUtils.createBackButton(user.getLanguageCode()));
+                userService.changeUserState(user, TgState.GOING_BACK_TO_PAST_EVENTS);
+            });
+        }
+    }
+
+    @Override
+    public void handleBackToPastEvents(TelegramUser user, String text) {
+        if(text.equals(BotMessages.BACK.getMessage(user.getLanguageCode()))) {
+            handlePastEvents(user);
+        }
+    }
+
+    private void handlePastEvents(TelegramUser user) {
+        List<Event> events = eventService.getPastEvents(user);
+        String languageCode = user.getLanguageCode();
+        if (events.isEmpty()) {
+            String message = BotMessages.NO_PAST_EVENTS.getMessage(languageCode);
+            sendMsgService.sendWithButton(user, message, botUtils.createBackButton(languageCode));
+        } else {
+            String pastEventMessage = eventService.getPastEventMessage(events, languageCode);
+            sendMsgService.sendWithButton(user, pastEventMessage, botUtils.createPastEventButtons(events, languageCode));
+            userService.changeUserState(user, TgState.CHOOSING_PAST_EVENT);
         }
     }
 
@@ -61,13 +121,14 @@ public class BotServiceImpl implements BotService {
 
     @SneakyThrows
     private void handleCreateEvent(TelegramUser user) {
-        String languageCode = user.getLanguageCode();
-        String message = BotMessages.CREATE_EVENT_MESSAGE.getMessage(languageCode);
-        sendMsgService.sendMessage(user, message);
-        {
-            Thread.sleep(1500);
-            askEventName(user, languageCode);
-        }
+//        String languageCode = user.getLanguageCode();
+//        String message = BotMessages.CREATE_EVENT_MESSAGE.getMessage(languageCode);
+//        sendMsgService.sendMessage(user, message);
+//        {
+//            Thread.sleep(1500);
+//            askEventName(user, languageCode);
+//        }
+        testService.createEvents(user);
     }
 
     private void askEventName(TelegramUser user, String languageCode) {
@@ -99,8 +160,16 @@ public class BotServiceImpl implements BotService {
         if (text.equals(BotMessages.BACK.getMessage(languageCode))) {
             askEventName(user, languageCode);
         } else {
-            user.setEventDate(text);
-            askEventVenue(user, languageCode);
+            String expectedDateTimeFormat = "dd.MM.yyyy HH:mm";
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(expectedDateTimeFormat);
+            try {
+                LocalDateTime dateTime = LocalDateTime.parse(text, dateTimeFormatter);
+                user.setEventDateTime(dateTime);
+                askEventVenue(user, languageCode);
+            } catch (DateTimeParseException e) {
+                String errorMessage = BotMessages.INVALID_DATE_TIME.getMessage(languageCode);
+                sendMsgService.sendWithButton(user, errorMessage, botUtils.createBackButton(languageCode));
+            }
         }
     }
 
@@ -232,7 +301,7 @@ public class BotServiceImpl implements BotService {
     @Override
     public void handleBackToMenu(TelegramUser user, String text) {
         String languageCode = user.getLanguageCode();
-        if(text.equals(BotMessages.BACK.getMessage(languageCode))){
+        if (text.equals(BotMessages.BACK.getMessage(languageCode))) {
             onStartCommand(user);
         }
     }
