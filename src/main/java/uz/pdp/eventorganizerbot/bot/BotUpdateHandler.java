@@ -65,10 +65,14 @@ public class BotUpdateHandler {
     private void handleCallbackQuery(CallbackQuery callbackQuery) {
         String data = callbackQuery.data();
         TelegramUser user = userService.findUser(callbackQuery);
-        if(data != null && data.startsWith("rsvp")) {
+        if (data != null && data.startsWith("rsvp")) {
             botService.handleRSVPOptions(user, data);
         } else if (data != null && data.startsWith("PAST") && user.getState().equals(TgState.CHOOSING_PAST_EVENT)) {
             botService.handlePastEventDetails(user, data);
+        } else if (data != null && data.startsWith("UPCOMING") && user.getState().equals(TgState.CHOOSING_UPCOMING_EVENT)) {
+            botService.handleUpcomingEventDetails(user, data);
+        } else if (data != null && data.startsWith("EVENT_ORGANIZER") && user.getState().equals(TgState.UPCOMING_EVENTS_ORGANIZER)) {
+            botService.handleUpcomingEventActions(user, data);
         }
     }
 

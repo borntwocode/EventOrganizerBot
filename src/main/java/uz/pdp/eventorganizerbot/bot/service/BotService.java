@@ -34,4 +34,8 @@ public interface BotService {
 
     void handleBackToPastEvents(TelegramUser user, String text);
 
+    void handleUpcomingEventDetails(TelegramUser user, String data);
+
+    void handleUpcomingEventActions(TelegramUser user, String data);
+
 }

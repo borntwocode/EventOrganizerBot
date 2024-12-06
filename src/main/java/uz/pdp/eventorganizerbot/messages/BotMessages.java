@@ -6,21 +6,21 @@ import lombok.AllArgsConstructor;
 public enum BotMessages {
 
     CHOOSE_MENU(
-            "\uD83D\uDCCBPlease select from the menu below!",
-            "\uD83D\uDCCBIltimos, quyidagi menyudan tanlang!",
-            "\uD83D\uDCCBПожалуйста, выберите из меню ниже!"
+            "\uD83D\uDCCB Please select from the menu below!",
+            "\uD83D\uDCCB Iltimos, quyidagi menyudan tanlang!",
+            "\uD83D\uDCCB Пожалуйста, выберите из меню ниже!"
     ),
 
     CREATE_EVENT(
-            "\uD83D\uDECDCreate Event",
-            "\uD83D\uDECDTadbir yaratish",
-            "\uD83D\uDECDСоздать событие"
+            "\uD83D\uDECD Create Event",
+            "\uD83D\uDECD Tadbir yaratish",
+            "\uD83D\uDECD Создать событие"
     ),
 
     MY_EVENTS(
-            "\uD83D\uDCC5My Events",
-            "\uD83D\uDCC5Mening tadbirlarrim",
-            "\uD83D\uDCC5Мои события"
+            "\uD83D\uDCC5 My Events",
+            "\uD83D\uDCC5 Mening tadbirlarrim",
+            "\uD83D\uDCC5 Мои события"
     ),
 
     PAST_EVENTS(
@@ -47,34 +47,34 @@ public enum BotMessages {
             "⏳ Предстоящие события не найдены"
     ),
 
-    PAST_EVENT_DETAILS(
+    PAST_UPCOMING_EVENT_DETAILS(
             "%d. Event Name: %s, Event Date Time: %s",
             "%d. Tadbir nomi: %s, Tadbir sanasi va vaqti: %s",
             "%d. Название события: %s, Дата и время события: %s"
     ),
 
     INVITE_FRIENDS(
-            "\uD83D\uDE4BInvite Friends",
-            "\uD83D\uDE4BDo'stlarni taklif qilish",
-            "\uD83D\uDE4BПригласить друзей"
+            "\uD83D\uDE4B Invite Friends",
+            "\uD83D\uDE4B Do'stlarni taklif qilish",
+            "\uD83D\uDE4B Пригласить друзей"
     ),
 
     HELP(
-            "❓Help",
-            "❓Yordam",
-            "❓Помощь"
+            "❓ Help",
+            "❓ Yordam",
+            "❓ Помощь"
     ),
 
     BACK(
-            "⬅️Back",
-            "⬅️Orqaga",
-            "⬅️Назад"
+            "⬅️ Back",
+            "⬅️ Orqaga",
+            "⬅️ Назад"
     ),
 
     SKIP(
-            "➡️Skip",
-            "➡️O'tkazib yuborish",
-            "➡️Пропустить"
+            "➡️ Skip",
+            "➡️ O'tkazib yuborish",
+            "➡️ Пропустить"
     ),
 
     CONFIRM(
@@ -113,19 +113,71 @@ public enum BotMessages {
             "\uD83E\uDD14 Может быть"
     ),
 
+    CANCEL_EVENT(
+            "❌ Cancel Event",
+            "❌ Tadbirni bekor qilish",
+            "❌ Отменить мероприятие"
+    ),
+
+    SEND_REMINDER(
+            "⏰ Send Reminder",
+            "⏰ Eslatma yuborish",
+            "⏰ Отправить напоминание"
+    ),
+
+    SEND_MESSAGE(
+            "💬 Send Message",
+            "💬 Xabar yuborish",
+            "💬 Отправить сообщение"
+    ),
+
+    EVENT_CANCELLED(
+            "🎉 The event has been cancelled",
+            "🎉 Tadbir bekor qilindi",
+            "🎉 Мероприятие отменено"
+    ),
+
+    CANCELLED_NOTIF_MESSAGE(
+            """
+            Hi %s! Your friend has cancelled an event:
+            🎉 Event Name: %s
+            ⏰ Date & Time: %s
+            📍 Venue: %s
+            """,
+            """
+            Salom %s! Do'stingiz tadbirni bekor qildi:
+            🎉 Tadbir nomi: %s
+            ⏰ Sana va vaqt: %s
+            📍 Manzil: %s
+            """,
+            """
+            Привет %s! Ваш друг отменил мероприятие:
+            🎉 Название мероприятия: %s
+            ⏰ Дата и время: %s
+            📍 Место проведения: %s
+            """
+    ),
+
+
     EVENT_DETAILS(
             "🎉 Event Name: %s\n⏰ Date & Time: %s\n📍 Venue: %s\n📝 Description: %s\n👥 Max Participants: %s",
             "🎉 Tadbir nomi: %s\n⏰ Sana va vaqt: %s\n📍 Manzil: %s\n📝 Tavsif: %s\n👥 Maksimal qatnashchilar: %s",
             "🎉 Название мероприятия: %s\n⏰ Дата и время: %s\n📍 Место проведения: %s\n📝 Описание: %s\n👥 Макс. участников: %s"
     ),
 
-    SHORT_EVENT_DETAILS(
-            "🎉 Event Name: %s\n⏰ Date & Time: %s\n📍 Venue: %s\n👥 Attendees: %d",
-            "🎉 Tadbir nomi: %s\n⏰ Sana va vaqt: %s\n📍 Manzil: %s\n👥 Ishtirokchilar: %d",
-            "🎉 Название мероприятия: %s\n⏰ Дата и время: %s\n📍 Место проведения: %s\n👥 Участники: %d"
+    EVENT_DETAILS_ORGANIZER(
+            "🎉 Event Name: %s\n⏰ Date & Time: %s\n📍 Venue: %s\n📝 Description: %s\n👥 Max Participants: %s\n👥 Attendees: %d",
+            "🎉 Tadbir nomi: %s\n⏰ Sana va vaqt: %s\n📍 Manzil: %s\n📝 Tavsif: %s\n👥 Maksimal qatnashchilar: %s\n👥 Ishtirokchilar: %d",
+            "🎉 Название мероприятия: %s\n⏰ Дата и время: %s\n📍 Место проведения: %s\n📝 Описание: %s\n👥 Макс. участников: %s\n👥 Участники: %d"
     ),
 
-    EVENT_DETAILS_V2(
+    EVENT_DETAILS_ATTENDEE(
+            "🎉 Event Name: %s\n⏰ Date & Time: %s\n📍 Venue: %s\n📝 Description: %s\n👥 Max Participants: %s\n👥 Organizer: %s",
+            "🎉 Tadbir nomi: %s\n⏰ Sana va vaqt: %s\n📍 Manzil: %s\n📝 Tavsif: %s\n👥 Maksimal qatnashchilar: %s\n👥 Tashkilotchi: %s",
+            "🎉 Название мероприятия: %s\n⏰ Дата и время: %s\n📍 Место проведения: %s\n📝 Описание: %s\n👥 Макс. участников: %s\n👥 Организатор: %s"
+    ),
+
+    EVENT_DETAILS_INVITATION(
             "Hi %s! You've been invited to an event:\n🎉 Event Name: %s\n⏰ Date & Time: %s\n📍 Venue: %s\n📝 Description: %s\n👥 Max Participants: %s\n🕒 Created On: %s",
             "Salom %s! Siz tadbirga taklif qilindingiz:\n🎉 Tadbir nomi: %s\n⏰ Sana va vaqt: %s\n📍 Manzil: %s\n📝 Tavsif: %s\n👥 Maksimal qatnashchilar: %s\n🕒 Yaratilgan vaqt: %s",
             "Привет, %s! Вы приглашены на мероприятие:\n🎉 Название мероприятия: %s\n⏰ Дата и время: %s\n📍 Место проведения: %s\n📝 Описание: %s\n👥 Макс. участников: %s\n🕒 Создано: %s"

@@ -1,5 +1,6 @@
 package uz.pdp.eventorganizerbot.bot.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import uz.pdp.eventorganizerbot.entity.enums.RSVPStatus;
 import uz.pdp.eventorganizerbot.entity.enums.TgState;
 import uz.pdp.eventorganizerbot.messages.BotMessages;
 import uz.pdp.eventorganizerbot.service.*;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -66,11 +68,24 @@ public class BotServiceImpl implements BotService {
         if (text.equals(BotMessages.PAST_EVENTS.getMessage(languageCode))) {
             handlePastEvents(user);
         } else if (text.equals(BotMessages.UPCOMING_EVENTS.getMessage(languageCode))) {
-
+            handleUpcomingEvents(user);
         } else if (text.equals(BotMessages.BACK.getMessage(languageCode))) {
             onStartCommand(user);
         } else {
             handleMyEvents(user);
+        }
+    }
+
+    private void handleUpcomingEvents(TelegramUser user) {
+        List<Event> events = eventService.getUpcomingEvents(user);
+        String languageCode = user.getLanguageCode();
+        if (events.isEmpty()) {
+            String message = BotMessages.NO_UPCOMING_EVENTS.getMessage(languageCode);
+            sendMsgService.sendWithButton(user, message, botUtils.createBackButton(languageCode));
+        } else {
+            String upcomingEventMessage = eventService.getUpcomingEventMessage(events, languageCode);
+            sendMsgService.sendWithButton(user, upcomingEventMessage, botUtils.createUpcomingPastEventButtons(events, languageCode, "UPCOMING"));
+            userService.changeUserState(user, TgState.CHOOSING_UPCOMING_EVENT);
         }
     }
 
@@ -86,10 +101,9 @@ public class BotServiceImpl implements BotService {
             eventOpt.ifPresent(event -> {
                 String eventMessage;
                 if (user.getId().equals(event.getOrganizer().getId())) {
-                    eventMessage = eventService.getPastEventDetailsMessage(event, languageCode, user);
+                    eventMessage = eventService.getPastUpcomingEventDetailsMessageOrganizer(event, languageCode);
                 } else {
-                    eventMessage = eventService.getPastEventDetailsMessage(event, languageCode, user);
-                    eventMessage = eventMessage.substring(0, eventMessage.lastIndexOf("👥") - 1);
+                    eventMessage = eventService.getPastUpcomingEventDetailsMessageAttendee(event, languageCode);
                 }
                 sendMsgService.sendWithButton(user, eventMessage, botUtils.createBackButton(languageCode));
                 userService.changeUserState(user, TgState.GOING_BACK_TO_PAST_EVENTS);
@@ -104,6 +118,61 @@ public class BotServiceImpl implements BotService {
         }
     }
 
+    @Override
+    public void handleUpcomingEventDetails(TelegramUser user, String data) {
+        String languageCode = user.getLanguageCode();
+        String payload = data.split("_")[1];
+        if (payload.equals("BACK")) {
+            handleMyEvents(user);
+        } else {
+            UUID eventId = UUID.fromString(payload);
+            Optional<Event> eventOpt = eventService.getEvent(eventId);
+            eventOpt.ifPresent(event -> {
+                if (user.getId().equals(event.getOrganizer().getId())) {
+                    String eventMessage = eventService.getPastUpcomingEventDetailsMessageOrganizer(event, languageCode);
+                    sendMsgService.sendWithButton(user, eventMessage, botUtils.createUpcomingEventOrganizerButtons(event, languageCode));
+                    userService.changeUserState(user, TgState.UPCOMING_EVENTS_ORGANIZER);
+                } else {
+                    String eventMessage = eventService.getPastUpcomingEventDetailsMessageAttendee(event, languageCode);
+                    sendMsgService.sendWithButton(user, eventMessage, botUtils.createBackButton(languageCode));
+                    userService.changeUserState(user, TgState.GOING_BACK_TO_PAST_EVENTS);
+                }
+
+            });
+        }
+    }
+
+    @Transactional
+    @Override
+    public void handleUpcomingEventActions(TelegramUser user, String data) {
+        String[] payload = data.split("_");
+        String action = payload[2];
+        if (action.equals("BACK")) {
+            handleUpcomingEvents(user);
+        } else {
+            String languageCode = user.getLanguageCode();
+            UUID eventId = UUID.fromString(payload[3]);
+            if(action.equals("CANCEL")){
+                handleCancelEvent(user, languageCode, eventId);
+            } else if (action.equals("REMINDER")) {
+
+            } else if (action.equals("MESSAGE")) {
+
+            }
+        }
+    }
+
+    private void handleCancelEvent(TelegramUser user, String languageCode, UUID eventId) {
+        String message = BotMessages.EVENT_CANCELLED.getMessage(languageCode);
+        eventService.getEvent(eventId).ifPresent(event -> {
+            List<RSVP> rsvps = rsvpService.findAllByEventId(eventId);
+            eventService.deleteById(eventId);
+            sendMsgService.sendMessage(user, message);
+            eventService.notifyAttendees(event, rsvps);
+            handleUpcomingEvents(user);
+        });
+    }
+
     private void handlePastEvents(TelegramUser user) {
         List<Event> events = eventService.getPastEvents(user);
         String languageCode = user.getLanguageCode();
@@ -112,7 +181,7 @@ public class BotServiceImpl implements BotService {
             sendMsgService.sendWithButton(user, message, botUtils.createBackButton(languageCode));
         } else {
             String pastEventMessage = eventService.getPastEventMessage(events, languageCode);
-            sendMsgService.sendWithButton(user, pastEventMessage, botUtils.createPastEventButtons(events, languageCode));
+            sendMsgService.sendWithButton(user, pastEventMessage, botUtils.createUpcomingPastEventButtons(events, languageCode, "PAST"));
             userService.changeUserState(user, TgState.CHOOSING_PAST_EVENT);
         }
     }

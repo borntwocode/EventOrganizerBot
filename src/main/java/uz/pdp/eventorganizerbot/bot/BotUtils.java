@@ -71,7 +71,7 @@ public class BotUtils {
         return replyMarkup.oneTimeKeyboard(true).resizeKeyboard(true);
     }
 
-    public InlineKeyboardMarkup createPastEventButtons(List<Event> events, String languageCode) {
+    public Keyboard createUpcomingPastEventButtons(List<Event> events, String languageCode, String upcomingPast) {
         int maxButtonsPerRow = 5;
         int numRows = (int) Math.ceil((double) events.size() / maxButtonsPerRow);
         InlineKeyboardButton[][] buttons = new InlineKeyboardButton[numRows][];
@@ -81,11 +81,24 @@ public class BotUtils {
             buttons[i] = new InlineKeyboardButton[buttonsInCurrentRow];
             for (int j = 0; j < buttonsInCurrentRow; j++) {
                 Event event = events.get(buttonCount++);
-                buttons[i][j] = new InlineKeyboardButton(String.valueOf(buttonCount)).callbackData("PAST_" + event.getId());
+                buttons[i][j] = new InlineKeyboardButton(String.valueOf(buttonCount)).callbackData(upcomingPast + "_" + event.getId());
             }
         }
-        var back = new InlineKeyboardButton(BotMessages.BACK.getMessage(languageCode)).callbackData("PAST_BACK");
+        var back = new InlineKeyboardButton(BotMessages.BACK.getMessage(languageCode)).callbackData(upcomingPast + "_BACK");
         return new InlineKeyboardMarkup(buttons).addRow(back);
+    }
+
+    public Keyboard createUpcomingEventOrganizerButtons(Event event, String languageCode) {
+        var keyboardMarkup = new InlineKeyboardMarkup();
+        var cancel = new InlineKeyboardButton(BotMessages.CANCEL.getMessage(languageCode)).callbackData("EVENT_ORGANIZER_CANCEL_" + event.getId());
+        var sendReminder = new InlineKeyboardButton(BotMessages.SEND_REMINDER.getMessage(languageCode)).callbackData("EVENT_ORGANIZER_REMINDER_" + event.getId());
+        var sendMessage = new InlineKeyboardButton(BotMessages.SEND_MESSAGE.getMessage(languageCode)).callbackData("EVENT_ORGANIZER_MESSAGE_" + event.getId());
+        keyboardMarkup.addRow(cancel);
+        keyboardMarkup.addRow(sendReminder);
+        keyboardMarkup.addRow(sendMessage);
+        var back = new InlineKeyboardButton(BotMessages.BACK.getMessage(languageCode)).callbackData("EVENT_ORGANIZER_BACK");
+        keyboardMarkup.addRow(back);
+        return keyboardMarkup;
     }
 
 }

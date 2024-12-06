@@ -19,8 +19,20 @@ public class TestService {
 
     public void createEvents(TelegramUser user) {
         faker.address().city();
-        for (int i = 0; i < 8; i++) {
-            LocalDateTime localDateTime = LocalDateTime.now().minusDays(random.nextInt(10)).minusHours(random.nextInt(10));
+        for (int i = 0; i < 10; i++) {
+            LocalDateTime localDateTime = LocalDateTime.now().minusMinutes(random.nextInt(10));
+            Event event = Event.builder()
+                    .venue(faker.address().city())
+                    .description(faker.lorem().sentence())
+                    .eventDateTime(localDateTime)
+                    .title(faker.lorem().word())
+                    .maxParticipants(String.valueOf(random.nextInt(20)))
+                    .organizer(user)
+                    .build();
+            eventRepo.save(event);
+        }
+        for (int i = 0; i < 6; i++) {
+            LocalDateTime localDateTime = LocalDateTime.now().plusMinutes(random.nextInt(10));
             Event event = Event.builder()
                     .venue(faker.address().city())
                     .description(faker.lorem().sentence())

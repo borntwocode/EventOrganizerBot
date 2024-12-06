@@ -1,6 +1,7 @@
 package uz.pdp.eventorganizerbot.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uz.pdp.eventorganizerbot.entity.Event;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventService {
 
+    private final SendMsgService sendMsgService;
     @Value("${bot.username}")
     private String botUsername;
 
@@ -47,7 +49,7 @@ public class EventService {
     }
 
     public String getEventMessage(Event event, String languageCode, TelegramUser user) {
-        String message = BotMessages.EVENT_DETAILS_V2.getMessage(languageCode);
+        String message = BotMessages.EVENT_DETAILS_INVITATION.getMessage(languageCode);
         return message.formatted(
                 user.getFirstName(),
                 event.getTitle(),
@@ -95,9 +97,53 @@ public class EventService {
     }
 
     public String getPastEventMessage(List<Event> events, String languageCode) {
-        String eventDetailsTemplate = BotMessages.PAST_EVENT_DETAILS.getMessage(languageCode);
+        String eventDetailsTemplate = BotMessages.PAST_UPCOMING_EVENT_DETAILS.getMessage(languageCode);
         StringBuilder formattedMessage = new StringBuilder();
         formattedMessage.append(BotMessages.PAST_EVENTS.getMessage(languageCode)).append("\n\n");
+        return getMessageBody(events, eventDetailsTemplate, formattedMessage);
+    }
+
+    public String getPastUpcomingEventDetailsMessageOrganizer(Event event, String languageCode) {
+        String message = BotMessages.EVENT_DETAILS_ORGANIZER.getMessage(languageCode);
+        List<RSVP> rsvps = rsvpService.findAllByEventId(event.getId());
+        long count = rsvps.stream()
+                .filter(rsvp -> rsvp.getStatus().equals(RSVPStatus.YES))
+                .count();
+        return message.formatted(
+                event.getTitle(),
+                event.getEventDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                event.getVenue(),
+                event.getDescription(),
+                event.getMaxParticipants(),
+                count
+        );
+    }
+
+    public String getPastUpcomingEventDetailsMessageAttendee(Event event, String languageCode) {
+        String message = BotMessages.EVENT_DETAILS_ATTENDEE.getMessage(languageCode);
+        return message.formatted(
+                event.getTitle(),
+                event.getEventDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                event.getVenue(),
+                event.getDescription(),
+                event.getMaxParticipants(),
+                event.getOrganizer().getFirstName()
+        );
+    }
+
+    public List<Event> getUpcomingEvents(TelegramUser user) {
+        return eventRepo.findAllUpcomingEventsByUserId(user.getId());
+    }
+
+    public String getUpcomingEventMessage(List<Event> events, String languageCode) {
+        String eventDetailsTemplate = BotMessages.PAST_UPCOMING_EVENT_DETAILS.getMessage(languageCode);
+        StringBuilder formattedMessage = new StringBuilder();
+        formattedMessage.append(BotMessages.UPCOMING_EVENTS.getMessage(languageCode)).append("\n\n");
+        return getMessageBody(events, eventDetailsTemplate, formattedMessage);
+    }
+
+    @NotNull
+    private String getMessageBody(List<Event> events, String eventDetailsTemplate, StringBuilder formattedMessage) {
         for (int i = 0; i < events.size(); i++) {
             Event event = events.get(i);
             String eventName = event.getTitle();
@@ -111,17 +157,27 @@ public class EventService {
         return formattedMessage.toString();
     }
 
-    public String getPastEventDetailsMessage(Event event, String languageCode, TelegramUser user) {
-        String message = BotMessages.SHORT_EVENT_DETAILS.getMessage(languageCode);
-        List<RSVP> rsvps = rsvpService.findAllByEventId(event.getId());
-        long count = rsvps.stream()
-                .filter(rsvp -> rsvp.getStatus().equals(RSVPStatus.YES))
-                .count();
+    public void deleteById(UUID eventId) {
+        eventRepo.deleteById(eventId);
+    }
+
+    public void notifyAttendees(@NotNull Event event, List<RSVP> rsvps) {
+        if(!rsvps.isEmpty()) {
+            for (RSVP rsvp : rsvps) {
+                TelegramUser user = rsvp.getUser();
+                String message = getCancelledEventMessage(event, user);
+                sendMsgService.sendMessage(user, message);
+            }
+        }
+    }
+
+    private String getCancelledEventMessage(Event event, TelegramUser user) {
+        String message = BotMessages.CANCELLED_NOTIF_MESSAGE.getMessage(user.getLanguageCode());
         return message.formatted(
-                user.getEventName(),
-                user.getEventDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
-                user.getEventVenue(),
-                count
+                user.getFirstName(),
+                event.getTitle(),
+                event.getEventDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                event.getVenue()
         );
     }
 
