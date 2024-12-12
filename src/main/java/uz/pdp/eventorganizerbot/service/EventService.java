@@ -10,6 +10,7 @@ import uz.pdp.eventorganizerbot.entity.TelegramUser;
 import uz.pdp.eventorganizerbot.entity.enums.RSVPStatus;
 import uz.pdp.eventorganizerbot.messages.BotMessages;
 import uz.pdp.eventorganizerbot.repo.EventRepo;
+
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -162,7 +163,7 @@ public class EventService {
     }
 
     public void notifyAttendees(@NotNull Event event, List<RSVP> rsvps) {
-        if(!rsvps.isEmpty()) {
+        if (!rsvps.isEmpty()) {
             for (RSVP rsvp : rsvps) {
                 TelegramUser user = rsvp.getUser();
                 String message = getCancelledEventMessage(event, user);
@@ -179,6 +180,24 @@ public class EventService {
                 event.getEventDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 event.getVenue()
         );
+    }
+
+    public void sendReminderToAttendees(List<RSVP> rsvps) {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        Map<String, String> languageReminders = new HashMap<>();
+        for (RSVP rsvp : rsvps) {
+            TelegramUser user = rsvp.getUser();
+            String languageCode = user.getLanguageCode();
+            String reminderMessage = languageReminders.computeIfAbsent(languageCode, BotMessages.REMINDER_MESSAGE::getMessage);
+            Event event = rsvp.getEvent();
+            String reminder = String.format(reminderMessage,
+                    event.getTitle(),
+                    event.getEventDateTime().format(dateFormatter),
+                    event.getVenue(),
+                    event.getDescription()
+            );
+            sendMsgService.sendMessage(user, reminder);
+        }
     }
 
 }

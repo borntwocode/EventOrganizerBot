@@ -137,7 +137,6 @@ public class BotServiceImpl implements BotService {
                     sendMsgService.sendWithButton(user, eventMessage, botUtils.createBackButton(languageCode));
                     userService.changeUserState(user, TgState.GOING_BACK_TO_PAST_EVENTS);
                 }
-
             });
         }
     }
@@ -152,13 +151,28 @@ public class BotServiceImpl implements BotService {
         } else {
             String languageCode = user.getLanguageCode();
             UUID eventId = UUID.fromString(payload[3]);
-            if(action.equals("CANCEL")){
-                handleCancelEvent(user, languageCode, eventId);
-            } else if (action.equals("REMINDER")) {
+            eventService.getEvent(eventId).ifPresent(event -> {
+                if(event.getEventDateTime().isAfter(LocalDateTime.now().minusMinutes(1))) {
+                    sendMsgService.sendMessage(user, BotMessages.EVENT_DEADLINE_PASSED.getMessage(languageCode));
+                    return;
+                }
+                if(action.equals("CANCEL")){
+                    handleCancelEvent(user, languageCode, eventId);
+                } else if (action.equals("REMINDER")) {
+                    handleSendReminderEventAttendees(user, languageCode, eventId);
+                } else if (action.equals("MESSAGE")) {
 
-            } else if (action.equals("MESSAGE")) {
+                }
+            });
+        }
+    }
 
-            }
+    private void handleSendReminderEventAttendees(TelegramUser user, String languageCode, UUID eventId) {
+        List<RSVP> rsvps = rsvpService.findAllByEventId(eventId);
+        if (rsvps.isEmpty()) {
+            sendMsgService.sendMessage(user, BotMessages.NO_RSVPS.getMessage(languageCode));
+        }else{
+            eventService.sendReminderToAttendees(rsvps);
         }
     }
 

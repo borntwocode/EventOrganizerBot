@@ -137,6 +137,51 @@ public enum BotMessages {
             "🎉 Мероприятие отменено"
     ),
 
+    EVENT_DEADLINE_PASSED(
+            "❌ You can't do any action because the event deadline has passed. For more details, check the Past Events section.",
+            "❌ Siz hech qanday amalni bajara olmaysiz, chunki tadbir muddati o'tib ketgan. Batafsil ma'lumot uchun O'tgan tadbirlar bo'limini tekshiring.",
+            "❌ Вы не можете выполнить никаких действий, так как срок мероприятия истёк. Для подробностей проверьте раздел Прошедшие мероприятия."
+    ),
+
+    NO_RSVPS(
+            "❌ You can't do this action because there are no RSVP'd users for your event yet.",
+            "❌ Siz bu amalni bajara olmaysiz, chunki tadbiringizda hali qatnashuvchilar yo'q.",
+            "❌ Вы не можете выполнить это действие, так как на ваше мероприятие ещё никто не зарегистрировался."
+    ),
+
+    REMINDER_MESSAGE(
+            """
+            📢 Reminder: Upcoming Event!
+            
+            Event Name: %s
+            Date & Time: %s
+            Venue: %s
+            Description: %s
+            
+            We’re looking forward to seeing you there!
+            """,
+            """
+            📢 Eslatma: Yaqinlashayotgan tadbir!
+            
+            Tadbir nomi: %s
+            Sana va vaqt: %s
+            Manzil: %s
+            Tavsif: %s
+            
+            Sizni u yerda ko'rishdan mamnunmiz!
+            """,
+            """
+            📢 Напоминание: Предстоящее мероприятие!
+            
+            Название мероприятия: %s
+            Дата и время: %s
+            Место проведения: %s
+            Описание: %s
+            
+            Будем рады видеть вас там!
+            """
+    ),
+
     CANCELLED_NOTIF_MESSAGE(
             """
             Hi %s! Your friend has cancelled an event:
