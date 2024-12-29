@@ -22,4 +22,11 @@ public interface EventRepo extends JpaRepository<Event, UUID> {
             """, nativeQuery = true)
     List<Event> findAllUpcomingEventsByUserId(UUID userId);
 
+    @Query(value = """
+            SELECT e.* FROM event e LEFT JOIN rsvp r ON r.event_id = e.id
+            WHERE e.organizer_id = :userId AND e.event_date > CURRENT_TIMESTAMP
+            ORDER BY e.event_date
+            """, nativeQuery = true)
+    List<Event> findAllUpcomingEventsByOrganizerId(UUID userId);
+
 }

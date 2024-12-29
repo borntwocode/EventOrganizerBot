@@ -12,7 +12,6 @@ import uz.pdp.eventorganizerbot.entity.enums.RSVPStatus;
 import uz.pdp.eventorganizerbot.entity.enums.TgState;
 import uz.pdp.eventorganizerbot.messages.BotMessages;
 import uz.pdp.eventorganizerbot.service.*;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -47,11 +46,32 @@ public class BotServiceImpl implements BotService {
         } else if (text.equals(BotMessages.MY_EVENTS.getMessage(user.getLanguageCode()))) {
             handleMyEvents(user);
         } else if (text.equals(BotMessages.INVITE_FRIENDS.getMessage(user.getLanguageCode()))) {
-//            handleInviteFriends(user);
+            handleInviteFriends(user);
+        } else if (text.equals(BotMessages.CHANGE_LANG.getMessage(user.getLanguageCode()))) {
+            handleLang(user);
         } else if (text.equals(BotMessages.HELP.getMessage(user.getLanguageCode()))) {
             handleHelp(user);
         } else {
             onStartCommand(user);
+        }
+    }
+
+    private void handleLang(TelegramUser user) {
+        String languageCode = user.getLanguageCode();
+        sendMsgService.sendWithButton(user, BotMessages.SELECT_LANG.getMessage(languageCode), botUtils.createLangButtons());
+        userService.changeUserState(user, TgState.CHANGING_LANG);
+    }
+
+    private void handleInviteFriends(TelegramUser user) {
+        List<Event> events = eventService.getUpcomingEventsByOrganizer(user);
+        String languageCode = user.getLanguageCode();
+        if (events.isEmpty()) {
+            String message = BotMessages.NO_EVENTS.getMessage(languageCode);
+            sendMsgService.sendWithButton(user, message, botUtils.createBackButton(languageCode));
+        } else {
+            String upcomingEventMessage = eventService.getUpcomingEventMessage(events, languageCode);
+            sendMsgService.sendWithButton(user, upcomingEventMessage, botUtils.createUpcomingPastEventButtons(events, languageCode, "UPCOMING"));
+            userService.changeUserState(user, TgState.CHOOSING_EVENT_INVITATION);
         }
     }
 
@@ -82,6 +102,7 @@ public class BotServiceImpl implements BotService {
         if (events.isEmpty()) {
             String message = BotMessages.NO_UPCOMING_EVENTS.getMessage(languageCode);
             sendMsgService.sendWithButton(user, message, botUtils.createBackButton(languageCode));
+            userService.changeUserState(user, TgState.CHOOSING_UPCOMING_EVENT);
         } else {
             String upcomingEventMessage = eventService.getUpcomingEventMessage(events, languageCode);
             sendMsgService.sendWithButton(user, upcomingEventMessage, botUtils.createUpcomingPastEventButtons(events, languageCode, "UPCOMING"));
@@ -135,7 +156,7 @@ public class BotServiceImpl implements BotService {
                 } else {
                     String eventMessage = eventService.getPastUpcomingEventDetailsMessageAttendee(event, languageCode);
                     sendMsgService.sendWithButton(user, eventMessage, botUtils.createBackButton(languageCode));
-                    userService.changeUserState(user, TgState.GOING_BACK_TO_PAST_EVENTS);
+                    userService.changeUserState(user, TgState.GOING_BACK_TO_UPCOMING_MENU);
                 }
             });
         }
@@ -152,18 +173,64 @@ public class BotServiceImpl implements BotService {
             String languageCode = user.getLanguageCode();
             UUID eventId = UUID.fromString(payload[3]);
             eventService.getEvent(eventId).ifPresent(event -> {
-                if(event.getEventDateTime().isAfter(LocalDateTime.now().minusMinutes(1))) {
+                if (event.getEventDateTime().isBefore(LocalDateTime.now()) ||
+                    event.getEventDateTime().isBefore(LocalDateTime.now().plusMinutes(5))) {
                     sendMsgService.sendMessage(user, BotMessages.EVENT_DEADLINE_PASSED.getMessage(languageCode));
                     return;
                 }
-                if(action.equals("CANCEL")){
+                if (action.equals("CANCEL")) {
                     handleCancelEvent(user, languageCode, eventId);
                 } else if (action.equals("REMINDER")) {
                     handleSendReminderEventAttendees(user, languageCode, eventId);
-                } else if (action.equals("MESSAGE")) {
-
                 }
             });
+        }
+    }
+
+    @Override
+    public void handleEventInvitation(TelegramUser user, String data) {
+        String languageCode = user.getLanguageCode();
+        String payload = data.split("_")[1];
+        if (payload.equals("BACK")) {
+            onStartCommand(user);
+        } else {
+            UUID eventId = UUID.fromString(payload);
+            Optional<Event> eventOpt = eventService.getEvent(eventId);
+            eventOpt.ifPresent(event -> {
+                if (event.getEventDateTime().isAfter(LocalDateTime.now())) {
+                    String invLink = eventService.genInvLink(eventId);
+                    sendMsgService.sendWithButton(user, invLink, botUtils.createBackButton(languageCode));
+                    userService.changeUserState(user, TgState.GOING_BACK_TO_MAIN_MENU);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void handleChangeLang(TelegramUser user, String data) {
+        String lang = data.split("_")[1];
+        userService.changeUserLang(user, lang);
+        onStartCommand(user);
+    }
+
+    @Override
+    public void handleBackToUpcomingMenu(TelegramUser user, String text) {
+        if (text.equals(BotMessages.BACK.getMessage(user.getLanguageCode()))) {
+            handleUpcomingEvents(user);
+        }
+    }
+
+    @Override
+    public void handlePastEventOptions(TelegramUser user, String text) {
+        if(text.equals(BotMessages.BACK.getMessage(user.getLanguageCode()))) {
+            handleMyEvents(user);
+        }
+    }
+
+    @Override
+    public void handleUpcomingEventOptions(TelegramUser user, String text) {
+        if(text.equals(BotMessages.BACK.getMessage(user.getLanguageCode()))) {
+            handleMyEvents(user);
         }
     }
 
@@ -171,7 +238,7 @@ public class BotServiceImpl implements BotService {
         List<RSVP> rsvps = rsvpService.findAllByEventId(eventId);
         if (rsvps.isEmpty()) {
             sendMsgService.sendMessage(user, BotMessages.NO_RSVPS.getMessage(languageCode));
-        }else{
+        } else {
             eventService.sendReminderToAttendees(rsvps);
         }
     }
@@ -193,6 +260,7 @@ public class BotServiceImpl implements BotService {
         if (events.isEmpty()) {
             String message = BotMessages.NO_PAST_EVENTS.getMessage(languageCode);
             sendMsgService.sendWithButton(user, message, botUtils.createBackButton(languageCode));
+            userService.changeUserState(user, TgState.CHOOSING_PAST_EVENT);
         } else {
             String pastEventMessage = eventService.getPastEventMessage(events, languageCode);
             sendMsgService.sendWithButton(user, pastEventMessage, botUtils.createUpcomingPastEventButtons(events, languageCode, "PAST"));
@@ -209,14 +277,14 @@ public class BotServiceImpl implements BotService {
 
     @SneakyThrows
     private void handleCreateEvent(TelegramUser user) {
-//        String languageCode = user.getLanguageCode();
-//        String message = BotMessages.CREATE_EVENT_MESSAGE.getMessage(languageCode);
-//        sendMsgService.sendMessage(user, message);
-//        {
-//            Thread.sleep(1500);
-//            askEventName(user, languageCode);
-//        }
-        testService.createEvents(user);
+        String languageCode = user.getLanguageCode();
+        String message = BotMessages.CREATE_EVENT_MESSAGE.getMessage(languageCode);
+        sendMsgService.sendMessage(user, message);
+        {
+            Thread.sleep(1500);
+            askEventName(user, languageCode);
+        }
+//        testService.createEvents(user);
     }
 
     private void askEventName(TelegramUser user, String languageCode) {
@@ -252,8 +320,12 @@ public class BotServiceImpl implements BotService {
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(expectedDateTimeFormat);
             try {
                 LocalDateTime dateTime = LocalDateTime.parse(text, dateTimeFormatter);
-                user.setEventDateTime(dateTime);
-                askEventVenue(user, languageCode);
+                if (dateTime.isBefore(LocalDateTime.now().plusHours(1))) {
+                    sendMsgService.sendMessage(user, BotMessages.EVENT_DATE_PASSED.getMessage(languageCode));
+                } else {
+                    user.setEventDateTime(dateTime);
+                    askEventVenue(user, languageCode);
+                }
             } catch (DateTimeParseException e) {
                 String errorMessage = BotMessages.INVALID_DATE_TIME.getMessage(languageCode);
                 sendMsgService.sendWithButton(user, errorMessage, botUtils.createBackButton(languageCode));
@@ -348,27 +420,28 @@ public class BotServiceImpl implements BotService {
     @Override
     public void handleRSVP(TelegramUser user, UUID eventId) {
         Optional<Event> eventOptional = eventService.getEvent(eventId);
+        String languageCode = user.getLanguageCode();
         eventOptional.ifPresentOrElse(event -> {
-            // Check if the user is not the organizer of the event
             if (!event.getOrganizer().getId().equals(user.getId())) {
-                // Check if the user has already RSVP'd to the event
                 boolean hasRSVPed = rsvpService.findAllByEventId(eventId).stream()
                         .anyMatch(rsvp -> rsvp.getUser().getId().equals(user.getId()));
 
                 if (!hasRSVPed) {
-                    // Create a new RSVP
-                    UUID rsvpId = rsvpService.createRSVP(event, user);
-                    String languageCode = user.getLanguageCode();
-                    String message = eventService.getEventMessage(event, languageCode, user);
-                    sendMsgService.sendWithButton(user, message, botUtils.createRSVPButtons(languageCode, event.getId()));
-                    System.out.println("RSVP created successfully with ID: " + rsvpId);
+
+                    if (event.getEventDateTime().isBefore(LocalDateTime.now()) ||
+                        event.getEventDateTime().isBefore(LocalDateTime.now().plusMinutes(5))) {
+                        sendMsgService.sendMessage(user, BotMessages.EVENT_INV_DEADLINE_PASSED.getMessage(languageCode));
+                    } else {
+                        String message = eventService.getEventMessage(event, languageCode, user);
+                        sendMsgService.sendWithButton(user, message, botUtils.createRSVPButtons(languageCode, event.getId()));
+                    }
                 } else {
-                    System.out.println("User has already RSVP'd to this event.");
+                    sendMsgService.sendMessage(user, BotMessages.ALREADY_RSVPED.getMessage(languageCode));
                 }
             } else {
-                System.out.println("The user is the organizer and cannot RSVP to their own event.");
+                sendMsgService.sendMessage(user, BotMessages.SELF_EVENT.getMessage(languageCode));
             }
-        }, () -> System.out.println("Event with ID " + eventId + " not found."));
+        }, () -> sendMsgService.sendMessage(user, BotMessages.EVENT_NO_LONGER_EXISTS.getMessage(languageCode)));
     }
 
     @Override
@@ -382,6 +455,9 @@ public class BotServiceImpl implements BotService {
                 rsvp.setStatus(RSVPStatus.getFromString(status));
                 rsvpService.save(rsvp);
                 notifyOrganizer(eventId, user);
+                String message = BotMessages.ANSWERED_TO_RSVP.getMessage(user.getLanguageCode())
+                        .formatted(RSVPStatus.getRsvpResponse(rsvp.getStatus()));
+                sendMsgService.sendMessage(user, message);
             }
         });
     }

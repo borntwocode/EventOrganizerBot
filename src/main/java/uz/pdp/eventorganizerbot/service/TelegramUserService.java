@@ -53,4 +53,9 @@ public class TelegramUserService {
         telegramUserRepo.save(user);
     }
 
+    public void changeUserLang(TelegramUser user, String lang) {
+        user.setLanguageCode(lang);
+        telegramUserRepo.save(user);
+    }
+
 }

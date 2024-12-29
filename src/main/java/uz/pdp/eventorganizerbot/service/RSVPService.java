@@ -17,9 +17,9 @@ public class RSVPService {
 
     private final RSVPRepo rsvpRepo;
 
-    public UUID createRSVP(Event event1, TelegramUser user) {
+    public UUID createRSVP(Event event, TelegramUser user) {
         RSVP rsvp = RSVP.builder()
-                .event(event1)
+                .event(event)
                 .user(user)
                 .build();
         return rsvpRepo.save(rsvp).getId();

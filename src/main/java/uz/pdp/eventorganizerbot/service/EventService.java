@@ -136,6 +136,10 @@ public class EventService {
         return eventRepo.findAllUpcomingEventsByUserId(user.getId());
     }
 
+    public List<Event> getUpcomingEventsByOrganizer(TelegramUser user) {
+        return eventRepo.findAllUpcomingEventsByOrganizerId(user.getId());
+    }
+
     public String getUpcomingEventMessage(List<Event> events, String languageCode) {
         String eventDetailsTemplate = BotMessages.PAST_UPCOMING_EVENT_DETAILS.getMessage(languageCode);
         StringBuilder formattedMessage = new StringBuilder();

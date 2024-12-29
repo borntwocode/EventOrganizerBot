@@ -58,6 +58,9 @@ public class BotUpdateHandler {
                 case CHOOSING_EVENT_OPTIONS -> botService.handleEventOptions(user, text);
                 case GOING_BACK_TO_MAIN_MENU -> botService.handleBackToMenu(user, text);
                 case GOING_BACK_TO_PAST_EVENTS -> botService.handleBackToPastEvents(user, text);
+                case GOING_BACK_TO_UPCOMING_MENU -> botService.handleBackToUpcomingMenu(user, text);
+                case CHOOSING_PAST_EVENT -> botService.handlePastEventOptions(user, text);
+                case CHOOSING_UPCOMING_EVENT -> botService.handleUpcomingEventOptions(user, text);
             }
         }
     }
@@ -71,8 +74,12 @@ public class BotUpdateHandler {
             botService.handlePastEventDetails(user, data);
         } else if (data != null && data.startsWith("UPCOMING") && user.getState().equals(TgState.CHOOSING_UPCOMING_EVENT)) {
             botService.handleUpcomingEventDetails(user, data);
+        } else if (data != null && data.startsWith("UPCOMING") && user.getState().equals(TgState.CHOOSING_EVENT_INVITATION)) {
+            botService.handleEventInvitation(user, data);
         } else if (data != null && data.startsWith("EVENT_ORGANIZER") && user.getState().equals(TgState.UPCOMING_EVENTS_ORGANIZER)) {
             botService.handleUpcomingEventActions(user, data);
+        } else if (data != null && data.startsWith("LANG") && user.getState().equals(TgState.CHANGING_LANG)) {
+            botService.handleChangeLang(user, data);
         }
     }
 

@@ -24,6 +24,9 @@ public class BotUtils {
                 BotMessages.INVITE_FRIENDS.getMessage(languageCode),
                 BotMessages.HELP.getMessage(languageCode)
         );
+        keyboardMarkup.addRow(
+                BotMessages.CHANGE_LANG.getMessage(languageCode)
+        );
         return keyboardMarkup.resizeKeyboard(true).oneTimeKeyboard(true);
     }
 
@@ -92,12 +95,20 @@ public class BotUtils {
         var keyboardMarkup = new InlineKeyboardMarkup();
         var cancel = new InlineKeyboardButton(BotMessages.CANCEL.getMessage(languageCode)).callbackData("EVENT_ORGANIZER_CANCEL_" + event.getId());
         var sendReminder = new InlineKeyboardButton(BotMessages.SEND_REMINDER.getMessage(languageCode)).callbackData("EVENT_ORGANIZER_REMINDER_" + event.getId());
-        var sendMessage = new InlineKeyboardButton(BotMessages.SEND_MESSAGE.getMessage(languageCode)).callbackData("EVENT_ORGANIZER_MESSAGE_" + event.getId());
         keyboardMarkup.addRow(cancel);
         keyboardMarkup.addRow(sendReminder);
-        keyboardMarkup.addRow(sendMessage);
         var back = new InlineKeyboardButton(BotMessages.BACK.getMessage(languageCode)).callbackData("EVENT_ORGANIZER_BACK");
         keyboardMarkup.addRow(back);
+        return keyboardMarkup;
+    }
+
+    public Keyboard createLangButtons() {
+        var keyboardMarkup = new InlineKeyboardMarkup();
+        keyboardMarkup.addRow(
+                new InlineKeyboardButton("\uD83C\uDDFA\uD83C\uDDFFuz").callbackData("LANG_uz"),
+                new InlineKeyboardButton("\uD83C\uDDF7\uD83C\uDDFAru").callbackData("LANG_ru"),
+                new InlineKeyboardButton("\uD83C\uDDEC\uD83C\uDDE7en").callbackData("LANG_en")
+        );
         return keyboardMarkup;
     }
 

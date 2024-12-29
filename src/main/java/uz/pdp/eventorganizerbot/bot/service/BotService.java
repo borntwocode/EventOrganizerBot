@@ -38,4 +38,14 @@ public interface BotService {
 
     void handleUpcomingEventActions(TelegramUser user, String data);
 
+    void handleEventInvitation(TelegramUser user, String data);
+
+    void handleChangeLang(TelegramUser user, String data);
+
+    void handleBackToUpcomingMenu(TelegramUser user, String text);
+
+    void handlePastEventOptions(TelegramUser user, String text);
+
+    void handleUpcomingEventOptions(TelegramUser user, String text);
+
 }

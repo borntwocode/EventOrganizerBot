@@ -19,8 +19,14 @@ public enum BotMessages {
 
     MY_EVENTS(
             "\uD83D\uDCC5 My Events",
-            "\uD83D\uDCC5 Mening tadbirlarrim",
+            "\uD83D\uDCC5 Mening tadbirlarim",
             "\uD83D\uDCC5 Мои события"
+    ),
+
+    CHANGE_LANG(
+            "🌍 Change Language",
+            "🌍 Tilni o'zgartirish",
+            "🌍 Изменить язык"
     ),
 
     PAST_EVENTS(
@@ -138,10 +144,11 @@ public enum BotMessages {
     ),
 
     EVENT_DEADLINE_PASSED(
-            "❌ You can't do any action because the event deadline has passed. For more details, check the Past Events section.",
-            "❌ Siz hech qanday amalni bajara olmaysiz, chunki tadbir muddati o'tib ketgan. Batafsil ma'lumot uchun O'tgan tadbirlar bo'limini tekshiring.",
-            "❌ Вы не можете выполнить никаких действий, так как срок мероприятия истёк. Для подробностей проверьте раздел Прошедшие мероприятия."
+            "❌ You can't take any action because the event deadline has passed or there are less than 5 minutes remaining.",
+            "❌ Siz hech qanday amalni bajara olmaysiz, chunki tadbir muddati o'tib ketgan yoki tugashiga 5 daqiqadan kam vaqt qolgan.",
+            "❌ Вы не можете выполнить никаких действий, так как срок мероприятия истёк или осталось менее 5 минут до его завершения."
     ),
+
 
     NO_RSVPS(
             "❌ You can't do this action because there are no RSVP'd users for your event yet.",
@@ -383,8 +390,61 @@ public enum BotMessages {
     
             Спасибо, что пользуетесь Event Organizer Bot!
             """
-    );
+    ),
 
+    ENTER_EVENT_MESSAGE(
+            "\uD83D\uDCC5 Please enter the message you want to send to all attendees:",
+            "\uD83D\uDCC5 Iltimos, barcha ishtirokchilarga yubormoqchi bo'lgan xabarni kiriting:",
+            "\uD83D\uDCC5 Пожалуйста, введите сообщение, которое вы хотите отправить всем участникам:"
+    ),
+
+    NO_EVENTS(
+            "❌ You don't have any events yet.",
+            "❌ Sizda hali hech qanday tadbirlar yo'q.",
+            "❌ У вас ещё нет никаких мероприятий."
+    ),
+
+    EVENT_INV_DEADLINE_PASSED(
+            "❌ You can no longer join this event because it has ended or there are less than 5 minutes remaining.",
+            "❌ Siz ushbu tadbirga qo'shila olmaysiz, chunki u tugagan yoki tugashiga 5 daqiqadan kam vaqt qolgan.",
+            "❌ Вы больше не можете присоединиться к этому мероприятию, так как оно завершилось или осталось менее 5 минут до его окончания."
+    ),
+
+    SELECT_LANG(
+            "🌐 Select Language",
+            "🌐 Tilni tanlang",
+            "🌐 Выберите язык"
+    ),
+
+    EVENT_DATE_PASSED(
+            "❌ The event date and time cannot be in the past. It must be at least 1 hour ahead of the current time.",
+            "❌ Tadbir sanasi va vaqti o’tgan bo’lmasligi kerak. U kamida 1 soat oldinda bo’lishi kerak.",
+            "❌ Дата и время события не могут быть в прошлом. Они должны быть как минимум через 1 час."
+    ),
+
+    ANSWERED_TO_RSVP(
+            "✅ You have responded to the RSVP. Response: %s\n\n🎉 You can manage your events by clicking /start.",
+            "✅ Siz taklifga javob berdingiz. Javob: %s\n\n🎉 Tadbirlaringizni boshqarish uchun /start tugmasini bosing.",
+            "✅ Вы ответили на приглашение (RSVP). Ответ: %s\n\n🎉 Вы можете управлять своими событиями, нажав /start."
+    ),
+
+    ALREADY_RSVPED(
+            "⚠️ You have already RSVP'd to this event.",
+            "⚠️ Siz ushbu tadbirga allaqachon javob bergansiz.",
+            "⚠️ Вы уже ответили на это приглашение."
+    ),
+
+    SELF_EVENT(
+            "❌ You cannot RSVP to your own event.",
+            "❌ Siz o'z tadbiringizga javob bera olmaysiz.",
+            "❌ Вы не можете ответить на своё собственное событие."
+    ),
+
+    EVENT_NO_LONGER_EXISTS(
+            "❌ The event could not be found. It may no longer exist.",
+            "❌ Tadbir topilmadi. Balki u endi mavjud emasdir.",
+            "❌ Событие не найдено. Возможно, оно больше не существует."
+    );
 
 
     private final String en;
